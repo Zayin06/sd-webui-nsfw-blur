@@ -19,7 +19,7 @@ safety_model_id = "CompVis/stable-diffusion-safety-checker"
 safety_feature_extractor = None
 safety_checker = None
 
-warning_image = os.path.join("extensions", "stable-diffusion-webui-nsfw-filter", "warning", "warning.png")
+warning_image = os.path.join("extensions", "sd-webui-nsfw-blur", "warning", "warning.png")
 
 
 def numpy_to_pil(images):

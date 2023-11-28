@@ -70,7 +70,7 @@ def censor_batch(x, safety_checker_adj: float):
                 image_np = (image_np * 255).astype(np.uint8)
                 background = to_pil(image_np)
 
-                new_img = Image.blend(background, overlay, 0.9)
+                new_img = Image.blend(background, overlay, 0.91)
 
                 new_img = (np.array(new_img) / 255.0).astype("float32")
                 new_img = torch.from_numpy(new_img)

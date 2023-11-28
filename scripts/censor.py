@@ -4,6 +4,9 @@ import gradio as gr
 import numpy as np
 import torch
 from PIL import Image
+
+from torchvision.transforms import ToPILImage
+
 from diffusers.utils import logging
 from scripts.safety_checker import StableDiffusionSafetyChecker
 from transformers import AutoFeatureExtractor
@@ -54,16 +57,32 @@ def censor_batch(x, safety_checker_adj: float):
     x_checked_image, has_nsfw_concept = check_safety(x_samples_ddim_numpy, safety_checker_adj)
     x = torch.from_numpy(x_checked_image).permute(0, 3, 1, 2)
 
+    to_pil = ToPILImage()
+
     index = 0
     for unsafe_value in has_nsfw_concept:
         try:
             if unsafe_value is True:
                 hwc = x.shape
-                y = Image.open(warning_image).convert("RGB").resize((hwc[3], hwc[2]))
-                y = (np.array(y) / 255.0).astype("float32")
-                y = torch.from_numpy(y)
-                y = torch.unsqueeze(y, 0).permute(0, 3, 1, 2)
-                x[index] = y
+                overlay = Image.open(warning_image).convert("RGB").resize((hwc[3], hwc[2]))
+                
+                image_np = x[index].permute(1, 2, 0).numpy()
+                image_np = (image_np * 255).astype(np.uint8)
+                background = to_pil(image_np)
+
+                new_img = Image.blend(background, overlay, 0.9)
+
+                new_img = (np.array(new_img) / 255.0).astype("float32")
+                new_img = torch.from_numpy(new_img)
+                new_img = torch.unsqueeze(new_img, 0).permute(0, 3, 1, 2)
+
+                x[index] = new_img
+                # hwc = x.shape
+                # y = Image.open(warning_image).convert("RGB").resize((hwc[3], hwc[2]))
+                # y = (np.array(y) / 255.0).astype("float32")
+                # y = torch.from_numpy(y)
+                # y = torch.unsqueeze(y, 0).permute(0, 3, 1, 2)
+                # x[index] = y
             index += 1
         except Exception as e:
             logger.warning(e)

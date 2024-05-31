@@ -19,7 +19,7 @@ safety_model_id = "CompVis/stable-diffusion-safety-checker"
 safety_feature_extractor = None
 safety_checker = None
 
-warning_image = os.path.join("extensions", "sd-webui-nsfw-blur", "warning", "warning.png")
+warning_image = os.path.join("extensions", "sd-webui-nsfw-blur", "warning", "warning.jpg")
 
 
 def numpy_to_pil(images):
@@ -70,7 +70,8 @@ def censor_batch(x, safety_checker_adj: float):
                 image_np = (image_np * 255).astype(np.uint8)
                 background = to_pil(image_np)
 
-                new_img = Image.blend(background, overlay, 0.91)
+                # new_img = Image.blend(background, overlay, 0.91)
+                new_img = Image.blend(background, overlay, 1)
 
                 new_img = (np.array(new_img) / 255.0).astype("float32")
                 new_img = torch.from_numpy(new_img)
